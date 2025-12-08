@@ -100,16 +100,15 @@ class _AppShellState extends State<AppShell> {
               ? NavigationRailLabelType.none
               : NavigationRailLabelType.selected,
           leading: _buildNavRailHeader(screenSize),
-          trailing: Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (playerProvider.currentSong != null)
-                  _DesktopMiniPlayer(onTap: () => _openPlayer(context)),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
+          trailing: playerProvider.currentSong != null
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _DesktopMiniPlayer(
+                    onTap: () => _openPlayer(context),
+                    isExtended: screenSize.width > Breakpoints.tablet,
+                  ),
+                )
+              : null,
           destinations: _destinations
               .map((d) => NavigationRailDestination(
                     icon: d.icon,
@@ -171,8 +170,12 @@ class _AppShellState extends State<AppShell> {
 
 class _DesktopMiniPlayer extends StatelessWidget {
   final VoidCallback onTap;
+  final bool isExtended;
 
-  const _DesktopMiniPlayer({required this.onTap});
+  const _DesktopMiniPlayer({
+    required this.onTap,
+    this.isExtended = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -182,29 +185,24 @@ class _DesktopMiniPlayer extends StatelessWidget {
 
     if (song == null) return const SizedBox.shrink();
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Progress
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(
-                value: playerProvider.progress,
-                minHeight: 3,
-                backgroundColor: colorScheme.surfaceContainerHighest,
-              ),
+    // 根据是否展开决定宽度
+    final width = isExtended ? 200.0 : 56.0;
+
+    if (!isExtended) {
+      // 收缩模式：只显示播放/暂停按钮
+      return SizedBox(
+        width: width,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(height: 8),
-            Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
@@ -217,60 +215,121 @@ class _DesktopMiniPlayer extends StatelessWidget {
                       width: 40,
                       height: 40,
                       color: colorScheme.surfaceContainerHighest,
-                      child: const Icon(Icons.music_note),
+                      child: const Icon(Icons.music_note, size: 20),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        song.title,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        song.artist,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.skip_previous, size: 20),
-                  onPressed: playerProvider.previous,
-                  visualDensity: VisualDensity.compact,
-                ),
+                const SizedBox(height: 4),
                 IconButton(
                   icon: Icon(
                     playerProvider.isPlaying ? Icons.pause : Icons.play_arrow,
+                    size: 20,
                   ),
                   onPressed: playerProvider.togglePlayPause,
                   visualDensity: VisualDensity.compact,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.skip_next, size: 20),
-                  onPressed: playerProvider.next,
-                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 ),
               ],
             ),
-          ],
+          ),
+        ),
+      );
+    }
+
+    // 展开模式：完整迷你播放器
+    return SizedBox(
+      width: width,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Progress
+              ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: LinearProgressIndicator(
+                  value: playerProvider.progress,
+                  minHeight: 3,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: Image.network(
+                      song.albumArt,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 40,
+                        height: 40,
+                        color: colorScheme.surfaceContainerHighest,
+                        child: const Icon(Icons.music_note),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          song.title,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          song.artist,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.skip_previous, size: 20),
+                    onPressed: playerProvider.previous,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      playerProvider.isPlaying ? Icons.pause : Icons.play_arrow,
+                    ),
+                    onPressed: playerProvider.togglePlayPause,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.skip_next, size: 20),
+                    onPressed: playerProvider.next,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
