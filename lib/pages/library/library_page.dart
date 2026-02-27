@@ -30,19 +30,14 @@ class _LibraryPageState extends State<LibraryPage> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // App Bar
           SliverAppBar(
-            floating: true,
-            pinned: true,
-            expandedHeight: 140,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                alignment: Alignment.bottomLeft,
                 padding: EdgeInsets.fromLTRB(
                   screenSize.horizontalPadding,
                   0,
                   screenSize.horizontalPadding,
-                  8,
+                  0,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -61,96 +56,21 @@ class _LibraryPageState extends State<LibraryPage> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Text(
                           'Your Library',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.search),
-                          onPressed: () {},
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () => _showCreatePlaylistDialog(context),
-                        ),
+                        Spacer(),
+                        IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+                        IconButton(onPressed: () {}, icon: Icon(Icons.add)),
                       ],
-                    ),
-                    const SizedBox(height: 12),
-                    // Filter chips
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _FilterChip(
-                            label: 'Playlists',
-                            selected: _filter == LibraryFilter.playlists,
-                            onSelected: () => setState(() => _filter = LibraryFilter.playlists),
-                          ),
-                          const SizedBox(width: 8),
-                          _FilterChip(
-                            label: 'Artists',
-                            selected: _filter == LibraryFilter.artists,
-                            onSelected: () => setState(() => _filter = LibraryFilter.artists),
-                          ),
-                          const SizedBox(width: 8),
-                          _FilterChip(
-                            label: 'Albums',
-                            selected: _filter == LibraryFilter.albums,
-                            onSelected: () => setState(() => _filter = LibraryFilter.albums),
-                          ),
-                        ],
-                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
-
-          // Sort & View Toggle
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenSize.horizontalPadding,
-                vertical: 8,
-              ),
-              child: Row(
-                children: [
-                  InkWell(
-                    onTap: () => _showSortOptions(context),
-                    borderRadius: BorderRadius.circular(20),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.swap_vert, size: 20),
-                          const SizedBox(width: 4),
-                          Text(_getSortLabel()),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
-                    onPressed: () => setState(() => _isGridView = !_isGridView),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Content
-          ..._buildContent(screenSize),
-
-          // Bottom padding
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 80),
           ),
         ],
       ),
@@ -180,9 +100,9 @@ class _LibraryPageState extends State<LibraryPage> {
               padding: const EdgeInsets.all(16),
               child: Text(
                 'Sort by',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             _SortOption(
@@ -225,9 +145,7 @@ class _LibraryPageState extends State<LibraryPage> {
         title: const Text('Create Playlist'),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Playlist name',
-          ),
+          decoration: const InputDecoration(hintText: 'Playlist name'),
           autofocus: true,
         ),
         actions: [
@@ -261,15 +179,14 @@ class _LibraryPageState extends State<LibraryPage> {
   }
 
   List<Widget> _buildPlaylists(ScreenSize screenSize) {
-    final playlists = [...MockData.userPlaylists, ...MockData.playlists.take(4)];
+    final playlists = [
+      ...MockData.userPlaylists,
+      ...MockData.playlists.take(4),
+    ];
 
     // Liked Songs item
     final likedSongs = [
-      SliverToBoxAdapter(
-        child: _LikedSongsItem(
-          onTap: () {},
-        ),
-      ),
+      SliverToBoxAdapter(child: _LikedSongsItem(onTap: () {})),
     ];
 
     if (_isGridView) {
@@ -290,7 +207,8 @@ class _LibraryPageState extends State<LibraryPage> {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PlaylistDetailPage(playlist: playlists[index]),
+                    builder: (context) =>
+                        PlaylistDetailPage(playlist: playlists[index]),
                   ),
                 ),
               ),
@@ -310,7 +228,8 @@ class _LibraryPageState extends State<LibraryPage> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PlaylistDetailPage(playlist: playlists[index]),
+                builder: (context) =>
+                    PlaylistDetailPage(playlist: playlists[index]),
               ),
             ),
           ),
@@ -335,10 +254,8 @@ class _LibraryPageState extends State<LibraryPage> {
               mainAxisSpacing: 16,
             ),
             delegate: SliverChildBuilderDelegate(
-              (context, index) => ArtistCard(
-                artist: artists[index],
-                onTap: () {},
-              ),
+              (context, index) =>
+                  ArtistCard(artist: artists[index], onTap: () {}),
               childCount: artists.length,
             ),
           ),
@@ -349,10 +266,7 @@ class _LibraryPageState extends State<LibraryPage> {
     return [
       SliverList(
         delegate: SliverChildBuilderDelegate(
-          (context, index) => ArtistTile(
-            artist: artists[index],
-            onTap: () {},
-          ),
+          (context, index) => ArtistTile(artist: artists[index], onTap: () {}),
           childCount: artists.length,
         ),
       ),
@@ -374,10 +288,7 @@ class _LibraryPageState extends State<LibraryPage> {
               mainAxisSpacing: 16,
             ),
             delegate: SliverChildBuilderDelegate(
-              (context, index) => AlbumCard(
-                album: albums[index],
-                onTap: () {},
-              ),
+              (context, index) => AlbumCard(album: albums[index], onTap: () {}),
               childCount: albums.length,
             ),
           ),
@@ -387,29 +298,30 @@ class _LibraryPageState extends State<LibraryPage> {
 
     return [
       SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final album = albums[index];
-            return ListTile(
-              leading: AppCachedImage(
-                imageUrl: album.coverImage,
-                width: 56,
-                height: 56,
-                borderRadius: BorderRadius.circular(4),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final album = albums[index];
+          return ListTile(
+            leading: AppCachedImage(
+              imageUrl: album.coverImage,
+              width: 56,
+              height: 56,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            title: Text(
+              album.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              '${album.artist} · ${album.type.label}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              title: Text(album.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle: Text(
-                '${album.artist} · ${album.type.label}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {},
-            );
-          },
-          childCount: albums.length,
-        ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          );
+        }, childCount: albums.length),
       ),
     ];
   }
@@ -496,17 +408,14 @@ class _LikedSongsItem extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(4),
         ),
-        child: Icon(
-          Icons.favorite,
-          color: colorScheme.onPrimary,
-        ),
+        child: Icon(Icons.favorite, color: colorScheme.onPrimary),
       ),
       title: const Text('Liked Songs'),
       subtitle: Text(
         '$likedCount songs',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: colorScheme.onSurfaceVariant,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
       ),
       trailing: const Icon(Icons.chevron_right),
     );
